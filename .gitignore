@@ -1,0 +1,14 @@
+# Runtime data and local credentials
+/data/
+.env
+.env.*
+!.env.example
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.log
+*.pem
+*.key
+*.pfx
+*.p12

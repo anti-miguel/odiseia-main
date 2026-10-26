@@ -1,0 +1,543 @@
+﻿<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lúmina - Compañía diaria</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css?v=lumina_ui_refresh_20260224" />
+  </head>
+  <body class="senior-mode">
+    <div id="loadingScreen" class="loading-screen">
+      <div class="loading-card">
+        <strong>Lúmina</strong>
+        <p>Cargando experiencia...</p>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">LÚMINA</p>
+        <h1>Compañía diaria para mente activa</h1>
+        <p class="subhead">Sesiones cortas, conversación amable y seguimiento familiar.</p>
+      </div>
+      <div class="top-actions">
+        <span id="activeContext" class="status-pill hidden"></span>
+        <span id="llmState" class="status-pill">Asistente: comprobando...</span>
+        <button id="switchUserBtn" type="button" class="btn-soft hidden">Cambiar acceso</button>
+        <button id="fontSizeBtn" type="button" class="btn-soft">Letra grande</button>
+      </div>
+    </header>
+
+    <section id="landingView" class="auth-gate card">
+      <h2>Lúmina</h2>
+      <p class="muted">
+        Plataforma de apoyo diario para personas mayores y cuidadores: conversación amable, ejercicios cognitivos,
+        seguimiento de medicación, citas médicas y panel familiar.
+      </p>
+      <div class="button-row">
+        <button id="landingStartBtn" type="button" class="btn-primary">Entrar en la aplicación</button>
+      </div>
+    </section>
+
+    <section id="authGate" class="auth-gate card hidden">
+      <h2>Acceso</h2>
+      <p class="muted">Elige rol y escribe el nombre del usuario.</p>
+      <div class="form-grid auth-grid">
+        <label>Rol
+          <select id="authRole">
+            <option value="user" selected>Usuario</option>
+            <option value="caregiver">Cuidador</option>
+          </select>
+        </label>
+        <label>Nombre del usuario
+          <input id="authUserName" type="text" placeholder="ej. Maria" />
+        </label>
+      </div>
+      <div class="button-row">
+        <button id="authLoginBtn" type="button" class="btn-primary">Entrar</button>
+      </div>
+      <p id="authError" class="muted"></p>
+      <div class="consent-box">
+        <label class="checkline">
+          <input id="authConsentData" type="checkbox" />
+          Acepto el tratamiento de mis datos para usar Lúmina.
+        </label>
+        <label class="checkline">
+          <input id="authConsentShare" type="checkbox" />
+          Acepto compartir datos con los dueños de la plataforma.
+        </label>
+      </div>
+      <p class="muted">Puedes cambiar estas opciones en la pestaña Privacidad en cualquier momento.</p>
+
+      <details class="advanced-box">
+        <summary>Crear nuevo usuario</summary>
+        <div class="form-grid auth-grid">
+          <label>Gustos (separados por comas)
+            <input id="newUserPrefs" type="text" placeholder="ej. música, cocina, pasear" />
+          </label>
+          <label>Energía preferida
+            <select id="newUserEnergy">
+              <option value="baja">Baja</option>
+              <option value="media" selected>Media</option>
+              <option value="alta">Alta</option>
+            </select>
+          </label>
+          <label>Peso (kg, opcional)
+            <input id="newUserWeight" type="number" min="20" max="300" step="0.1" placeholder="ej. 72.5" />
+          </label>
+          <label>Año de nacimiento (opcional)
+            <input id="newUserBirthYear" type="number" min="1900" max="2100" placeholder="ej. 1950" />
+          </label>
+          <label>Datos importantes
+            <input id="newUserNotes" type="text" placeholder="Alergias, movilidad, contacto..." />
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="createUserBtn" type="button" class="btn-secondary">Crear usuario</button>
+        </div>
+      </details>
+    </section>
+
+    <nav id="tabNav" class="tab-nav hidden" aria-label="Vistas principales">
+      <button id="tabSessionBtn" class="tab-btn active" type="button">Sesión de hoy</button>
+      <button id="tabCaregiverBtn" class="tab-btn" type="button">Panel familiar</button>
+      <button id="tabPharmacyBtn" class="tab-btn" type="button">Farmacia</button>
+      <button id="tabQuedadasBtn" class="tab-btn" type="button">Quedadas</button>
+      <button id="tabPrivacyBtn" class="tab-btn" type="button">Privacidad</button>
+    </nav>
+
+    <main id="mainLayout" class="layout hidden">
+      <section id="sessionView" class="panel">
+        <article class="card welcome-card">
+          <h2 id="welcomeName">Hola</h2>
+          <p class="muted">Te acompaño con una sesión sencilla de 5 a 10 minutos.</p>
+          <div id="prefTags" class="tags"></div>
+          <div class="progress-wrap">
+            <label for="sessionProgress">Progreso de la sesión</label>
+            <progress id="sessionProgress" max="4" value="0"></progress>
+            <span id="progressText" class="inline-pill">0/4 pasos</span>
+          </div>
+        </article>
+
+        <article class="card step-card">
+          <p class="step-index">Paso 1</p>
+          <h3>¿Cómo te sientes hoy</h3>
+          <div class="mood-row">
+            <button type="button" class="mood-btn" data-mood="1">1</button>
+            <button type="button" class="mood-btn" data-mood="2">2</button>
+            <button type="button" class="mood-btn active" data-mood="3">3</button>
+            <button type="button" class="mood-btn" data-mood="4">4</button>
+            <button type="button" class="mood-btn" data-mood="5">5</button>
+          </div>
+          <div class="inline-fields">
+            <label>¿Hablaste con alguien hoy
+              <select id="socialToday">
+                <option value="false" selected>No todavía</option>
+                <option value="true">Sí</option>
+              </select>
+            </label>
+          </div>
+          <input id="mood" type="hidden" value="3" />
+          <span id="moodValue" class="inline-pill">Ánimo: 3/5</span>
+        </article>
+
+        <article class="card step-card">
+          <p class="step-index">Paso 2</p>
+          <h3>Hablemos un momento</h3>
+          <p class="muted">Puedes escribir o usar voz. Yo te respondo con calma.</p>
+          <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <div class="chat-controls">
+            <textarea id="chatInput" rows="3" placeholder="Cuéntame cómo ha ido tu día..."></textarea>
+            <div class="button-row">
+              <button id="sendChatBtn" class="btn-primary">Enviar</button>
+              <button id="voiceInputBtn" class="btn-secondary" type="button">Hablar</button>
+              <button id="speakBtn" class="btn-secondary" type="button">Escuchar respuesta</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card step-card">
+          <p class="step-index">Paso 3</p>
+          <h3 id="gameTitle">Juego mental del día</h3>
+          <p id="gameInstruction" class="muted">Cargando juego...</p>
+          <p class="muted">Dificultad: <strong id="gameDifficulty">-</strong></p>
+
+          <div id="gameMemoryBox" class="game-box">
+            <div class="memory-words-wrap">
+              <p id="memoryWords" class="memory-words">-</p>
+              <button id="toggleWordsBtn" type="button" class="btn-soft">Mostrar/Ocultar</button>
+            </div>
+            <label>Palabras recordadas (separa por comas)
+              <input id="memoryRecall" type="text" placeholder="ej. parque, tren, lluvia, cafe" />
+            </label>
+          </div>
+
+          <div id="gameDigitsBox" class="game-box hidden">
+            <p class="memory-words">Secuencia: <strong id="digitsSequence">-</strong></p>
+            <label>Escribe la secuencia al revés
+              <input id="digitsAnswer" type="text" placeholder="ej. 1947" />
+            </label>
+          </div>
+
+          <div id="gameCategoryBox" class="game-box hidden">
+            <p class="memory-words">Categoría: <strong id="categoryName">-</strong></p>
+            <p class="muted">Objetivo mínimo: <strong id="categoryTarget">-</strong> palabras.</p>
+            <label>Escribe palabras (separa por comas)
+              <input id="categoryAnswer" type="text" placeholder="ej. perro, gato, caballo..." />
+            </label>
+          </div>
+
+          <div id="gameSudokuBox" class="game-box hidden">
+            <p id="sudokuHelpText" class="muted">Completa los espacios vacíos sin repetir números.</p>
+            <div id="sudokuGrid" class="sudoku-grid" role="group" aria-label="Sudoku"></div>
+          </div>
+
+          <div id="gameCrosswordBox" class="game-box hidden">
+            <p class="memory-words">Tema: <strong id="crosswordTheme">-</strong></p>
+            <div id="crosswordList" class="crossword-list"></div>
+          </div>
+
+          <div id="gameWordsearchBox" class="game-box hidden">
+            <p class="memory-words">Tema: <strong id="wordsearchTheme">-</strong></p>
+            <pre id="wordsearchGrid" class="wordsearch-grid">-</pre>
+            <p class="muted">Palabras objetivo: <strong id="wordsearchWords">-</strong></p>
+            <label>Palabras encontradas (separa por comas)
+              <input id="wordsearchAnswer" type="text" placeholder="ej. sol, mar, flor" />
+            </label>
+          </div>
+
+          <div id="gameCardsBox" class="game-box hidden">
+            <p class="muted">Levanta dos cartas y encuentra parejas.</p>
+            <div id="cardsGrid" class="cards-grid" role="group" aria-label="Memoria de cartas"></div>
+            <p class="muted">Parejas encontradas: <strong id="cardsMatched">0</strong></p>
+          </div>
+
+          <div class="button-row">
+            <button id="scoreMemoryBtn" class="btn-primary" type="button">Comprobar</button>
+            <button id="newMemoryBtn" class="btn-secondary" type="button">Siguiente juego</button>
+            <span id="memoryScore" class="inline-pill">0/4</span>
+          </div>
+        </article>
+
+        <article class="card step-card">
+          <p class="step-index">Paso 4</p>
+          <h3>Cierre y plan social de hoy</h3>
+          <ul id="socialIdeas" class="plain-list"></ul>
+          <label>Nota opcional
+            <textarea id="notes" rows="3" placeholder="Ejemplo: hoy me sentí con más energía"></textarea>
+          </label>
+          <details class="advanced-box">
+            <summary>Opciones avanzadas (cuidador/profesional)</summary>
+            <div class="form-grid">
+              <label>Latencia (segundos)
+                <input id="latencySeconds" type="number" min="5" max="300" value="40" />
+              </label>
+              <label>Frustración
+                <select id="frustration">
+                  <option value="baja" selected>Baja</option>
+                  <option value="media">Media</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </label>
+              <label>Errores orientación
+                <input id="orientationErrors" type="number" min="0" max="5" value="0" />
+              </label>
+              <label>Duración (min)
+                <input id="engagementMinutes" type="number" min="1" max="30" value="8" />
+              </label>
+              <label>Acierto ejercicio (%)
+                <input id="correctness" type="number" min="0" max="100" value="70" />
+              </label>
+              <label>Ayuda solicitada
+                <input id="helpRequested" type="number" min="0" max="10" value="0" />
+              </label>
+            </div>
+          </details>
+          <button id="saveSessionBtn" class="btn-accent btn-block">Terminar sesión y guardar</button>
+        </article>
+
+        <article class="card">
+          <h3>Ejercicio recomendado</h3>
+          <p class="exercise-meta">
+            <span>Dominio: <strong id="exerciseDomain">-</strong></span>
+            <span>Nivel: <strong id="exerciseLevel">-</strong></span>
+          </p>
+          <p id="exercisePrompt" class="exercise-prompt">Cargando...</p>
+        </article>
+      </section>
+
+      <aside id="caregiverView" class="panel hidden">
+        <article class="card">
+          <div class="card-head">
+            <h2>Panel familiar / cuidador</h2>
+            <button id="refreshBtn" type="button" class="btn-soft">Actualizar</button>
+          </div>
+          <p class="muted">Solo supervisión de tendencias. No diagnóstico.</p>
+          <div id="metricGrid" class="metric-grid"></div>
+        </article>
+
+        <article class="card" id="caregiverMedCard">
+          <h3>Seguimiento de medicación</h3>
+          <p id="caregiverMedStatus" class="muted">Aún no hay tomas registradas en esta sesión.</p>
+          <p id="caregiverMedCountdown" class="inline-pill">Sin cuenta atrás activa</p>
+        </article>
+
+        <article class="card">
+          <h3>Alertas activas</h3>
+          <div id="alertsBox" class="alerts-box"></div>
+        </article>
+
+        <article class="card">
+          <h3>Últimas sesiones</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Dominio</th>
+                  <th>Acierto</th>
+                  <th>Ánimo</th>
+                  <th>Latencia</th>
+                </tr>
+              </thead>
+              <tbody id="recentBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </aside>
+
+      <aside id="pharmacyView" class="panel hidden">
+        <article class="card">
+          <h2>Farmacia</h2>
+          <p id="pharmacyDoseNote" class="muted"></p>
+          <p id="pharmacyReminder" class="inline-pill">Sin recordatorios programados.</p>
+          <div class="form-grid">
+            <div class="metric">
+              <div class="metric-label">Adherencia hoy</div>
+              <div id="pharmacyAdherence" class="metric-value">0%</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Peso registrado</div>
+              <div id="pharmacyWeight" class="metric-value">-</div>
+            </div>
+          </div>
+          <p class="muted">Pendientes hoy</p>
+          <ul id="pharmacyPending" class="plain-list"></ul>
+          <p class="muted">Stock bajo</p>
+          <ul id="pharmacyLowStock" class="plain-list"></ul>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Medicamento</th>
+                  <th>Dosis</th>
+                  <th>Horarios</th>
+                  <th>Stock</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="pharmacyRows"></tbody>
+            </table>
+          </div>
+
+          <details class="advanced-box">
+            <summary>Agregar medicamento</summary>
+            <div class="form-grid">
+              <label>Nombre
+                <input id="medName" type="text" placeholder="ej. Losartán" />
+              </label>
+              <label>Dosis prescrita
+                <input id="medDose" type="text" placeholder="ej. 50 mg" />
+              </label>
+              <label>Horarios (HH:MM, coma)
+                <input id="medTimes" type="text" placeholder="08:00,20:00" />
+              </label>
+              <label>Frecuencia
+                <select id="medFrequency">
+                  <option value="daily" selected>Todos los días</option>
+                  <option value="every_2_days">Cada 2 días</option>
+                  <option value="weekly">Una vez por semana</option>
+                </select>
+              </label>
+              <label>Día semanal (si aplica)
+                <select id="medWeekday">
+                  <option value="0">Lunes</option>
+                  <option value="1">Martes</option>
+                  <option value="2">Miércoles</option>
+                  <option value="3">Jueves</option>
+                  <option value="4">Viernes</option>
+                  <option value="5">Síbado</option>
+                  <option value="6">Domingo</option>
+                </select>
+              </label>
+              <label>Stock inicial (unidades)
+                <input id="medStock" type="number" min="0" max="5000" value="30" />
+              </label>
+              <label>Umbral stock bajo
+                <input id="medLow" type="number" min="0" max="1000" value="5" />
+              </label>
+              <label>Prescrito por
+                <input id="medPrescriber" type="text" placeholder="Dra. Pérez" />
+              </label>
+              <label>Peso actual (kg, opcional)
+                <input id="medWeight" type="number" min="20" max="300" step="0.1" placeholder="ej. 72.5" />
+              </label>
+              <label>Notas
+                <input id="medNotes" type="text" placeholder="Tomar con comida" />
+              </label>
+            </div>
+            <button id="addMedBtn" type="button" class="btn-primary">Guardar medicamento</button>
+          </details>
+        </article>
+
+        <article class="card">
+          <h3>Citas médicas</h3>
+          <p class="muted">Te avisaremos el día de antes y el mismo día.</p>
+          <ul id="appointmentAlerts" class="plain-list"></ul>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Lugar</th>
+                  <th>Notas</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentRows"></tbody>
+            </table>
+          </div>
+          <details class="advanced-box">
+            <summary>Agregar cita médica</summary>
+            <div class="form-grid">
+              <label>Día
+                <input id="appointmentDate" type="date" />
+              </label>
+              <label>Hora
+                <input id="appointmentTime" type="time" />
+              </label>
+              <label>Hospital o centro
+                <input id="appointmentPlace" type="text" placeholder="ej. Hospital Clínico" />
+              </label>
+              <label>Notas
+                <input id="appointmentNotes" type="text" placeholder="Consulta cardiología" />
+              </label>
+            </div>
+            <button id="addAppointmentBtn" type="button" class="btn-primary">Guardar cita</button>
+          </details>
+        </article>
+      </aside>
+
+      <aside id="quedadasView" class="panel hidden">
+        <article class="card">
+          <div class="card-head">
+            <h2>Quedadas propuestas</h2>
+            <button id="refreshQuedadasBtn" type="button" class="btn-soft">Actualizar</button>
+          </div>
+          <p class="muted">Actividades para socializar y mantener el contacto.</p>
+          <div id="quedadasContainer" class="quedadas-container"></div>
+        </article>
+
+        <article class="card">
+          <h3>Buscar quedadas cercanas</h3>
+          <p class="muted">Usa tu ubicación o escribe una dirección para encontrar actividades próximas.</p>
+          <div class="form-grid">
+            <label>Dirección o zona
+              <input id="nearbyAddress" type="text" placeholder="ej. Calle Mayor 1, Madrid" />
+            </label>
+            <label>Dirección detectada
+              <input id="nearbyDetectedAddress" type="text" readonly placeholder="Se rellenará al permitir ubicación" />
+            </label>
+            <label>Radio (km)
+              <input id="nearbyRadiusKm" type="number" min="1" max="50" value="5" />
+            </label>
+            <label>Búsqueda
+              <input id="nearbyQuery" type="text" placeholder="bingo, centro cívico, taller..." />
+            </label>
+          </div>
+          <div class="button-row">
+            <button id="nearbyUseLocationBtn" type="button" class="btn-soft">Usar mi ubicación</button>
+            <button id="searchNearbyBtn" type="button" class="btn-primary">Buscar cercanas</button>
+            <span id="nearbyStatus" class="inline-pill">Sin búsqueda</span>
+          </div>
+          <div id="nearbyMap" class="nearby-map"></div>
+          <div id="nearbyResults" class="quedadas-container"></div>
+        </article>
+
+        <article class="card">
+          <h3>Proponer nueva quedada</h3>
+          <div class="form-grid">
+            <label>Actividad
+              <input id="quedadaActivity" type="text" placeholder="ej. Bingo" />
+            </label>
+            <label>Lugar
+              <input id="quedadaPlace" type="text" placeholder="ej. Centro Cívico Juan Maestra" />
+            </label>
+            <label>Fecha
+              <input id="quedadaDate" type="date" />
+            </label>
+            <label>Hora
+              <input id="quedadaTime" type="time" />
+            </label>
+            <label>Descripción
+              <textarea id="quedadaDescription" rows="3" placeholder="Detalles sobre la actividad..."></textarea>
+            </label>
+          </div>
+          <button id="addQuedadaBtn" type="button" class="btn-primary">Crear quedada</button>
+        </article>
+      </aside>
+
+      <aside id="privacyView" class="panel hidden">
+        <article class="card">
+          <h2>Privacidad y consentimiento</h2>
+          <p class="muted">Configura cómo se usan tus datos y decide si quieres compartirlos con la plataforma.</p>
+          <div class="form-grid">
+            <label class="checkline">
+              <input id="privacyConsentData" type="checkbox" />
+              Consentimiento de uso de datos para funcionamiento de la app
+            </label>
+            <label class="checkline">
+              <input id="privacySharePlatform" type="checkbox" />
+              Compartir datos con dueños de la plataforma
+            </label>
+            <label class="checkline">
+              <input id="privacyAnonAnalytics" type="checkbox" />
+              Permitir uso anónimo para mejoras del servicio
+            </label>
+          </div>
+          <div class="button-row">
+            <button id="savePrivacyBtn" type="button" class="btn-primary">Guardar privacidad</button>
+            <span id="privacyStatus" class="inline-pill">Sin cambios</span>
+          </div>
+        </article>
+        <article class="card danger-card">
+          <h3>Borrar todos los datos</h3>
+          <p class="muted">Elimina sesiones, farmacia, citas, quedadas y datos del perfil del usuario activo.</p>
+          <button id="deleteAllDataBtn" type="button" class="btn-danger">Borrar todos mis datos</button>
+        </article>
+      </aside>
+    </main>
+
+    <div id="medDueNotice" class="med-due-notice hidden" role="alert" aria-live="assertive">
+      <strong>Recordatorio de medicación</strong>
+      <p id="medDueNoticeText">Es hora de tomar tu medicación.</p>
+      <button id="medDueDismissBtn" type="button" class="btn-soft">Cerrar aviso</button>
+    </div>
+
+    <div id="appointmentNotice" class="med-due-notice hidden" role="alert" aria-live="assertive">
+      <strong>Recordatorio de cita médica</strong>
+      <p id="appointmentNoticeText">Tienes una cita médica próxima.</p>
+      <button id="appointmentDismissBtn" type="button" class="btn-soft">Cerrar aviso</button>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
+
+
+
