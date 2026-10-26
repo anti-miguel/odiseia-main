@@ -4,7 +4,7 @@ Prototipo desarrollado en equipo para el hackathon **OdiseIA4Good 2026**, cuyo r
 
 ## Equipo
 
-Proyecto de cinco personas: cuatro estudiantes de Ciencia de Datos e IA de UDIT y un desarrollador full-stack. Miguel Canals se encargó de la mayor parte del desarrollo técnico y el perfil full-stack implementó uno de los módulos. Gracias a todo el equipo por el trabajo.
+Proyecto de cinco personas: cuatro estudiantes de Ciencia de Datos e IA y un desarrollador full-stack. Miguel Canals se encargó de la mayor parte del desarrollo técnico y el perfil full-stack implementó uno de los módulos. Gracias a todo el equipo por el trabajo.
 
 ## Qué hace
 
